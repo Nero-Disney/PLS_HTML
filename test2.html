@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SPAR VBA Label Editor</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111827;
+    color: #e5e7eb;
+    overflow: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 58px 1fr;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+    background: #0b1220;
+    border-bottom: 1px solid #273449;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 12px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #16a34a;
+    margin-right: 20px;
+}
+
+.logo span {
+    color: white;
+}
+
+.toolbar {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e5e7eb;
+    padding: 8px 13px;
+    border-radius: 7px;
+    transition: .15s;
+}
+
+.btn:hover {
+    background: #334155;
+}
+
+.btn.green {
+    background: #15803d;
+    border-color: #16a34a;
+    color: white;
+}
+
+.btn.green:hover {
+    background: #16a34a;
+}
+
+.btn.blue {
+    background: #1d4ed8;
+    border-color: #2563eb;
+}
+
+.btn.red {
+    background: #991b1b;
+    border-color: #dc2626;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+    display: grid;
+    grid-template-columns: 320px 1fr 390px;
+    min-height: 0;
+}
+
+/* =========================================================
+   LEFT PANEL
+========================================================= */
+
+.left {
+    background: #111827;
+    border-right: 1px solid #273449;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.panel-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin: 5px 0 12px;
+    font-weight: bold;
+}
+
+.section {
+    background: #182235;
+    border: 1px solid #273449;
+    border-radius: 9px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 11px 12px;
+    background: #1e293b;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.section-content {
+    padding: 12px;
+}
+
+.field {
+    margin-bottom: 11px;
+}
+
+.field label {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+    outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #16a34a;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* =========================================================
+   CENTER
+========================================================= */
+
+.center {
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.center-header {
+    height: 48px;
+    border-bottom: 1px solid #273449;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 8px;
+}
+
+.tab {
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: #94a3b8;
+}
+
+.tab.active {
+    background: #1e293b;
+    color: white;
+}
+
+.workspace {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    padding: 35px;
+}
+
+/* =========================================================
+   LABEL PREVIEW
+========================================================= */
+
+.preview-area {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100%;
+}
+
+.sheet {
+    position: relative;
+    width: 760px;
+    height: 560px;
+    background: white;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    transform-origin: top center;
+}
+
+.label {
+    position: absolute;
+    border: 1px dashed #bbb;
+    background: white;
+    overflow: hidden;
+}
+
+.text-object {
+    position: absolute;
+    white-space: nowrap;
+    color: black;
+    cursor: move;
+    user-select: none;
+}
+
+.text-object.selected {
+    outline: 2px solid #16a34a;
+    outline-offset: 2px;
+}
+
+/* =========================================================
+   RIGHT PANEL
+========================================================= */
+
+.right {
+    background: #111827;
+    border-left: 1px solid #273449;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.right-header {
+    padding: 13px 15px;
+    border-bottom: 1px solid #273449;
+    font-weight: bold;
+}
+
+.code-area {
+    flex: 1;
+    position: relative;
+}
+
+textarea#codeEditor {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: 0;
+    outline: none;
+    padding: 16px;
+    background: #020617;
+    color: #d1fae5;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    tab-size: 4;
+}
+
+.status {
+    height: 30px;
+    background: #020617;
+    border-top: 1px solid #273449;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 760px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+
+.help {
+    color: #94a3b8;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.close {
+    float: right;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1100px) {
+    .main {
+        grid-template-columns: 280px 1fr;
+    }
+
+    .right {
+        display: none;
+    }
+}
+
+@media(max-width:700px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+
+    .left {
+        display: none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+    <div class="logo">
+        SPAR <span>VBA Label Editor</span>
+    </div>
+
+    <div class="toolbar">
+
+        <button class="btn" onclick="openVBA()">
+            📂 Ouvrir VBA
+        </button>
+
+        <button class="btn green" onclick="generateVBA()">
+            ⚙ Générer VBA
+        </button>
+
+        <button class="btn" onclick="downloadVBA()">
+            💾 Télécharger .bas
+        </button>
+
+        <button class="btn" onclick="saveConfig()">
+            📦 Sauver config
+        </button>
+
+        <button class="btn" onclick="loadConfig()">
+            📥 Charger config
+        </button>
+
+        <button class="btn blue" onclick="showHelp()">
+            ?
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<div class="main">
+
+<!-- =====================================================
+     LEFT
+===================================================== -->
+
+<aside class="left">
+
+<div class="panel-title">
+    Paramètres
+</div>
+
+
+<!-- DIMENSIONS -->
+
+<div class="section">
+
+<div class="section-header">
+    📐 Grille
+</div>
+
+<div class="section-content">
+
+<div class="grid2">
+
+<div class="field">
+<label>Largeur étiquette (mm)</label>
+<input id="labelWidth" type="number" value="145">
+</div>
+
+<div class="field">
+<label>Hauteur étiquette (mm)</label>
+<input id="labelHeight" type="number" value="100">
+</div>
+
+</div>
+
+<div class="grid2">
+
+<div class="field">
+<label>Marge gauche</label>
+<input id="marginLeft" type="number" value="10">
+</div>
+
+<div class="field">
+<label>Marge haute</label>
+<input id="marginTop" type="number" value="10">
+</div>
+
+</div>
+
+<div class="grid2">
+
+<div class="field">
+<label>Espace X</label>
+<input id="spaceX" type="number" value="6">
+</div>
+
+<div class="field">
+<label>Espace Y</label>
+<input id="spaceY" type="number" value="6">
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- DECALAGES -->
+
+<div class="section">
+
+<div class="section-header">
+    ↔ Décalages
+</div>
+
+<div class="section-content">
+
+<div class="field">
+<label>Décalage global X (px)</label>
+<input id="globalX" type="number" value="66">
+</div>
+
+<div class="field">
+<label>Décalage colonne droite (px)</label>
+<input id="columnX" type="number" value="20">
+</div>
+
+<div class="field">
+<label>Brand haut (px)</label>
+<input id="brandDown" type="number" value="8">
+</div>
+
+<div class="field">
+<label>Item haut (px)</label>
+<input id="itemHigh" type="number" value="4">
+</div>
+
+<div class="field">
+<label>Éléments généraux (px)</label>
+<input id="generalUp" type="number" value="20">
+</div>
+
+<div class="field">
+<label>Bas supplémentaire (px)</label>
+<input id="bottomUp" type="number" value="20">
+</div>
+
+<div class="field">
+<label>Promo bas (px)</label>
+<input id="promoBottom" type="number" value="5">
+</div>
+
+<div class="field">
+<label>UOM bas (px)</label>
+<input id="uomDown" type="number" value="7">
+</div>
+
+<div class="field">
+<label>SPAR PRICE haut (px)</label>
+<input id="sparTop" type="number" value="9">
+</div>
+
+<div class="field">
+<label>Part No / Date haut (px)</label>
+<input id="bottomTop15" type="number" value="15">
+</div>
+
+</div>
+</div>
+
+
+<!-- TYPOGRAPHIE -->
+
+<div class="section">
+
+<div class="section-header">
+    🔤 Typographie
+</div>
+
+<div class="section-content">
+
+<div class="field">
+<label>Police Brand</label>
+<select id="brandFont">
+<option>Calibri</option>
+<option>Arial</option>
+<option>Verdana</option>
+<option>Tahoma</option>
+</select>
+</div>
+
+<div class="field">
+<label>Taille Brand</label>
+<input id="brandSize" type="number" step=".1" value="36">
+</div>
+
+<div class="field">
+<label>Taille Item Name</label>
+<input id="itemSize" type="number" step=".1" value="19.5">
+</div>
+
+<div class="field">
+<label>Taille Promo Price</label>
+<input id="promoSize" type="number" step=".1" value="58.5">
+</div>
+
+<div class="field">
+<label>Taille Selling Price</label>
+<input id="sellingSize" type="number" step=".1" value="32">
+</div>
+
+<div class="field">
+<label>Taille textes secondaires</label>
+<input id="secondarySize" type="number" step=".1" value="10.6">
+</div>
+
+<div class="field">
+<label>Taille devise</label>
+<input id="currencySize" type="number" step=".1" value="11.4">
+</div>
+
+</div>
+</div>
+
+
+<!-- DONNEES -->
+
+<div class="section">
+
+<div class="section-header">
+    📊 Données Excel
+</div>
+
+<div class="section-content">
+
+<div class="field">
+<label>Chemin Excel</label>
+<input id="excelPath"
+value="C:\Users\SPAR YASSA\Videos\WORKDIR\_MAIN PROMO\BTS\BTS.xlsx">
+</div>
+
+<div class="field">
+<label>Feuille Excel</label>
+<input id="sheetName" value="Feuil1">
+</div>
+
+<div class="field">
+<label>Colonne Part No</label>
+<input id="partColumn" value="1">
+</div>
+
+<div class="field">
+<label>Colonne Item</label>
+<input id="itemColumn" value="2">
+</div>
+
+<div class="field">
+<label>Colonne Brand</label>
+<input id="brandColumn" value="3">
+</div>
+
+<div class="field">
+<label>Colonne Selling Price</label>
+<input id="sellingColumn" value="4">
+</div>
+
+<div class="field">
+<label>Colonne Promo Price</label>
+<input id="promoColumn" value="5">
+</div>
+
+<div class="field">
+<label>Colonne Promo End</label>
+<input id="promoEndColumn" value="7">
+</div>
+
+</div>
+</div>
+
+
+<!-- TEXTE -->
+
+<div class="section">
+
+<div class="section-header">
+    📝 Textes
+</div>
+
+<div class="section-content">
+
+<div class="field">
+<label>Texte SPAR PRICE</label>
+<input id="sparText" value="SPAR PRICE:">
+</div>
+
+<div class="field">
+<label>UOM</label>
+<input id="uomText" value="L'UNITE">
+</div>
+
+<div class="field">
+<label>Devise</label>
+<input id="currencyText" value="FCFA">
+</div>
+
+<div class="field">
+<label>Date</label>
+<input id="dateText" value="JUSQU'AU">
+</div>
+
+<div class="field">
+<label>T&C</label>
+<input id="tcText" value="*T&C Apply">
+</div>
+
+</div>
+</div>
+
+</aside>
+
+
+<!-- =====================================================
+     CENTER PREVIEW
+===================================================== -->
+
+<section class="center">
+
+<div class="center-header">
+
+<div class="tab active">
+    👁 Prévisualisation
+</div>
+
+<button class="btn" onclick="refreshPreview()">
+    ↻ Actualiser
+</button>
+
+<button class="btn" onclick="zoomOut()">
+    −
+</button>
+
+<button class="btn" onclick="zoomIn()">
+    +
+</button>
+
+</div>
+
+
+<div class="workspace">
+
+<div class="preview-area">
+
+<div class="sheet" id="sheet">
+
+    <!-- LABEL 1 -->
+
+    <div class="label"
+         id="label1"
+         style="left:20px;top:20px;width:350px;height:240px;">
+
+        <div class="text-object"
+             style="left:25px;top:18px;font-family:Calibri;font-size:28px;font-weight:bold;">
+            SPAR
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:58px;font-family:Calibri;font-size:15px;font-weight:bold;">
+            PRODUIT EXEMPLE
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            SPAR PRICE:
+        </div>
+
+        <div class="text-object"
+             style="left:125px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            L'UNITE
+        </div>
+
+        <div class="text-object"
+             style="left:70px;top:125px;font-family:Arial Black;font-size:45px;font-weight:bold;">
+            1 500 FCFA
+        </div>
+
+        <div class="text-object"
+             style="left:230px;top:108px;font-family:Arial Black;font-size:22px;font-weight:bold;text-decoration:line-through;">
+            2 000
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:210px;font-family:Arial;font-size:10px;font-weight:bold;">
+            REF001
+        </div>
+
+        <div class="text-object"
+             style="left:125px;top:210px;font-family:Arial;font-size:10px;font-weight:bold;">
+            JUSQU'AU 31/12/2026
+        </div>
+
+        <div class="text-object"
+             style="left:285px;top:210px;font-family:Arial;font-size:10px;font-weight:bold;">
+            *T&C Apply
+        </div>
+
+    </div>
+
+
+    <!-- LABEL 2 -->
+
+    <div class="label"
+         id="label2"
+         style="left:390px;top:20px;width:350px;height:240px;">
+
+        <div class="text-object"
+             style="left:25px;top:18px;font-family:Calibri;font-size:28px;font-weight:bold;">
+            COCA-COLA
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:58px;font-family:Calibri;font-size:15px;font-weight:bold;">
+            BOISSON GAZEUSE
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            SPAR PRICE:
+        </div>
+
+        <div class="text-object"
+             style="left:125px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            L'UNITE
+        </div>
+
+        <div class="text-object"
+             style="left:70px;top:125px;font-family:Arial Black;font-size:45px;font-weight:bold;">
+            750 FCFA
+        </div>
+
+    </div>
+
+
+    <!-- LABEL 3 -->
+
+    <div class="label"
+         id="label3"
+         style="left:20px;top:300px;width:350px;height:240px;">
+
+        <div class="text-object"
+             style="left:25px;top:18px;font-family:Calibri;font-size:28px;font-weight:bold;">
+            NESTLE
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:58px;font-family:Calibri;font-size:15px;font-weight:bold;">
+            EAU MINERALE
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            SPAR PRICE:
+        </div>
+
+        <div class="text-object"
+             style="left:125px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            L'UNITE
+        </div>
+
+        <div class="text-object"
+             style="left:70px;top:125px;font-family:Arial Black;font-size:45px;font-weight:bold;">
+            500 FCFA
+        </div>
+
+    </div>
+
+
+    <!-- LABEL 4 -->
+
+    <div class="label"
+         id="label4"
+         style="left:390px;top:300px;width:350px;height:240px;">
+
+        <div class="text-object"
+             style="left:25px;top:18px;font-family:Calibri;font-size:28px;font-weight:bold;">
+            DOVE
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:58px;font-family:Calibri;font-size:15px;font-weight:bold;">
+            SAVON
+        </div>
+
+        <div class="text-object"
+             style="left:25px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            SPAR PRICE:
+        </div>
+
+        <div class="text-object"
+             style="left:125px;top:105px;font-family:Arial;font-size:10px;font-weight:bold;">
+            L'UNITE
+        </div>
+
+        <div class="text-object"
+             style="left:70px;top:125px;font-family:Arial Black;font-size:45px;font-weight:bold;">
+            1 250 FCFA
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     RIGHT CODE
+===================================================== -->
+
+<aside class="right">
+
+<div class="right-header">
+    💻 Code VBA
+</div>
+
+<div class="code-area">
+
+<textarea id="codeEditor" spellcheck="false">
+
+' Le code VBA généré apparaîtra ici.
+
+' Clique sur "Générer VBA"
+' pour reconstruire le code
+' à partir des paramètres graphiques.
+
+</textarea>
+
+</div>
+
+<div class="status" id="status">
+    Prêt.
+</div>
+
+</aside>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL HELP
+===================================================== -->
+
+<div class="modal" id="helpModal">
+
+<div class="modal-box">
+
+<button class="btn close" onclick="closeHelp()">✕</button>
+
+<div class="modal-title">
+    SPAR VBA Label Editor
+</div>
+
+<div class="help">
+
+<p>
+Cette application sert d'interface graphique pour modifier
+ton générateur d'étiquettes PowerPoint VBA.
+</p>
+
+<p>
+Le principe est simple :
+</p>
+
+<ul>
+<li>Tu modifies les paramètres à gauche.</li>
+<li>La prévisualisation se met à jour.</li>
+<li>Tu génères le VBA.</li>
+<li>Tu peux ensuite télécharger le fichier <b>.bas</b>.</li>
+</ul>
+
+<p>
+Le programme ne modifie pas directement ton fichier PowerPoint.
+Il génère le code VBA que tu peux ensuite importer dans
+l'éditeur VBA de PowerPoint.
+</p>
+
+<p>
+La prochaine évolution pourra permettre de sélectionner
+directement chaque élément de l'étiquette et de le déplacer
+avec la souris.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   UTILITAIRES
+========================================================= */
+
+const $ = id => document.getElementById(id);
+
+let currentZoom = 1;
+
+function mmToPt(mm) {
+    return mm * 2.83464567;
+}
+
+function pxToPt(px) {
+    return px * 0.75;
+}
+
+function ptToMm(pt) {
+    return pt / 2.83464567;
+}
+
+
+/* =========================================================
+   LECTURE CONFIGURATION
+========================================================= */
+
+function getConfig() {
+
+    return {
+
+        grid: {
+            width: Number($("labelWidth").value),
+            height: Number($("labelHeight").value),
+            marginLeft: Number($("marginLeft").value),
+            marginTop: Number($("marginTop").value),
+            spaceX: Number($("spaceX").value),
+            spaceY: Number($("spaceY").value)
+        },
+
+        offsets: {
+            globalX: Number($("globalX").value),
+            columnX: Number($("columnX").value),
+            brandDown: Number($("brandDown").value),
+            itemHigh: Number($("itemHigh").value),
+            generalUp: Number($("generalUp").value),
+            bottomUp: Number($("bottomUp").value),
+            promoBottom: Number($("promoBottom").value),
+            uomDown: Number($("uomDown").value),
+            sparTop: Number($("sparTop").value),
+            bottomTop15: Number($("bottomTop15").value)
+        },
+
+        typography: {
+            brandFont: $("brandFont").value,
+            brandSize: Number($("brandSize").value),
+            itemSize: Number($("itemSize").value),
+            promoSize: Number($("promoSize").value),
+            sellingSize: Number($("sellingSize").value),
+            secondarySize: Number($("secondarySize").value),
+            currencySize: Number($("currencySize").value)
+        },
+
+        excel: {
+            path: $("excelPath").value,
+            sheet: $("sheetName").value,
+            partColumn: $("partColumn").value,
+            itemColumn: $("itemColumn").value,
+            brandColumn: $("brandColumn").value,
+            sellingColumn: $("sellingColumn").value,
+            promoColumn: $("promoColumn").value,
+            promoEndColumn: $("promoEndColumn").value
+        },
+
+        texts: {
+            spar: $("sparText").value,
+            uom: $("uomText").value,
+            currency: $("currencyText").value,
+            date: $("dateText").value,
+            tc: $("tcText").value
+        }
+
+    };
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+function refreshPreview() {
+
+    const cfg = getConfig();
+
+    const labels = document.querySelectorAll(".label");
+
+    labels.forEach(label => {
+
+        label.style.width =
+            (cfg.grid.width * 2.4) + "px";
+
+        label.style.height =
+            (cfg.grid.height * 2.4) + "px";
+
+    });
+
+    $("status").textContent =
+        "Prévisualisation actualisée.";
+
+}
+
+
+/* =========================================================
+   ZOOM
+========================================================= */
+
+function zoomIn() {
+
+    currentZoom += .1;
+
+    $("sheet").style.transform =
+        `scale(${currentZoom})`;
+
+}
+
+function zoomOut() {
+
+    currentZoom -= .1;
+
+    if (currentZoom < .4)
+        currentZoom = .4;
+
+    $("sheet").style.transform =
+        `scale(${currentZoom})`;
+
+}
+
+
+/* =========================================================
+   GENERATION VBA
+========================================================= */
+
+function generateVBA() {
+
+    const c = getConfig();
+
+    const vba = `Option Explicit
+
+' =========================================================
+' SPAR VBA LABEL GENERATOR
+' Généré automatiquement par SPAR VBA Label Editor
+' =========================================================
+
+Const CHEMIN_EXCEL As String = "${c.excel.path}"
+Const FEUILLE_EXCEL As String = "${c.excel.sheet}"
+
+Const EXP_ETIQUETTE_LARGEUR As Double = ${c.grid.width}#
+Const EXP_ETIQUETTE_HAUTEUR As Double = ${c.grid.height}#
+Const EXP_MARGE_GAUCHE As Double = ${c.grid.marginLeft}#
+Const EXP_MARGE_HAUTE As Double = ${c.grid.marginTop}#
+Const EXP_ESPACE_X As Double = ${c.grid.spaceX}#
+Const EXP_ESPACE_Y As Double = ${c.grid.spaceY}#
+
+Sub GenererEtiquettesSparFideles()
+
+    Dim xlApp As Object
+    Dim xlBook As Object
+    Dim xlSheet As Object
+
+    Dim pptSlide As Slide
+
+    Dim i As Long
+    Dim rowCount As Long
+    Dim labelIdx As Integer
+
+    Dim partNo As String
+    Dim itemName As String
+    Dim brand As String
+    Dim sellingPrice As String
+    Dim promoPrice As String
+    Dim promoEnd As String
+
+    Dim baseLeft As Single
+    Dim baseTop As Single
+
+    On Error GoTo ErreurExcel
+
+    Set xlApp = CreateObject("Excel.Application")
+
+    Set xlBook = xlApp.Workbooks.Open(CHEMIN_EXCEL)
+
+    Set xlSheet = xlBook.Sheets(FEUILLE_EXCEL)
+
+    rowCount = xlSheet.Cells(xlSheet.Rows.Count, 1).End(-4162).Row
+
+    labelIdx = 0
+
+    Do While ActivePresentation.Slides.Count > 0
+        ActivePresentation.Slides(1).Delete
+    Loop
+
+    For i = 2 To rowCount
+
+        partNo = UCase(Trim(CStr(xlSheet.Cells(i, ${c.excel.partColumn}).Value)))
+
+        itemName = UCase(Trim(CStr(xlSheet.Cells(i, ${c.excel.itemColumn}).Value)))
+
+        brand = UCase(Trim(CStr(xlSheet.Cells(i, ${c.excel.brandColumn}).Value)))
+
+        sellingPrice = Trim(CStr(xlSheet.Cells(i, ${c.excel.sellingColumn}).Value))
+
+        promoPrice = Trim(CStr(xlSheet.Cells(i, ${c.excel.promoColumn}).Value))
+
+        promoEnd = UCase(Trim(CStr(xlSheet.Cells(i, ${c.excel.promoEndColumn}).Value)))
+
+
+        If Len(brand) > 0 Then
+
+            If InStr(itemName, brand) > 0 Then
+
+                itemName = Trim(Replace(itemName, brand, ""))
+
+                itemName = Replace(itemName, "  ", " ")
+
+            End If
+
+        End If
+
+
+        If labelIdx Mod 4 = 0 Then
+
+            Set pptSlide = ActivePresentation.Slides.Add( _
+                ActivePresentation.Slides.Count + 1, _
+                ppLayoutBlank)
+
+            labelIdx = 0
+
+        End If
+
+
+        Dim col As Integer
+        Dim rowNum As Integer
+
+        col = labelIdx Mod 2
+        rowNum = labelIdx \\ 2
+
+
+        baseLeft = MMtoPoints( _
+            EXP_MARGE_GAUCHE + _
+            (col * (EXP_ETIQUETTE_LARGEUR + EXP_ESPACE_X)) _
+        )
+
+        baseTop = MMtoPoints( _
+            EXP_MARGE_HAUTE + _
+            (rowNum * (EXP_ETIQUETTE_HAUTEUR + EXP_ESPACE_Y)) _
+        )
+
+
+        baseLeft = baseLeft - PixelsToPoints(${c.offsets.globalX})
+
+        If col = 1 Then
+
+            baseLeft = baseLeft - PixelsToPoints(${c.offsets.columnX})
+
+        End If
+
+
+        Dim curBrandTop As Double
+        Dim curItemTop As Double
+        Dim curStaticTop As Double
+        Dim curPromoTop As Double
+        Dim curUomTop As Double
+        Dim curBottomTop As Double
+
+
+        If rowNum = 0 Then
+
+            curBrandTop = 8 + PixelsToPointsToMM(PixelsToPoints(${c.offsets.brandDown}))
+
+            curItemTop = 23 - PixelsToPointsToMM(PixelsToPoints(${c.offsets.itemHigh}))
+
+            curStaticTop = 38 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp})) _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.sparTop}))
+
+            curPromoTop = 46 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp}))
+
+            curUomTop = 70 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp}))
+
+            curBottomTop = 78 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp})) _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.bottomTop15}))
+
+        Else
+
+            curBrandTop = 8 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.itemHigh}))
+
+            curItemTop = 23 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.itemHigh}))
+
+            curStaticTop = 38 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp}))
+
+            curPromoTop = 46 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp})) _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.promoBottom}))
+
+            curUomTop = 70 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp})) _
+                + PixelsToPointsToMM(PixelsToPoints(${c.offsets.uomDown})) _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.bottomUp}))
+
+            curBottomTop = 78 _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.generalUp})) _
+                - PixelsToPointsToMM(PixelsToPoints(${c.offsets.bottomUp}))
+
+        End If
+
+
+        ' BRAND
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            10, curBrandTop, 125, 15, _
+            brand, "${c.typography.brandFont}", ${c.typography.brandSize}, _
+            True, ppAlignLeft, False, ""
+
+
+        ' ITEM NAME
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            10, curItemTop, 125, 10, _
+            itemName, "Calibri", ${c.typography.itemSize}, _
+            True, ppAlignLeft, False, ""
+
+
+        ' SPAR PRICE
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            10, curStaticTop, 40, 6, _
+            "${c.texts.spar}", "Arial", ${c.typography.secondarySize}, _
+            True, ppAlignLeft, False, ""
+
+
+        ' UOM
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            50, curUomTop, 45, 6, _
+            "${c.texts.uom}", "Arial", ${c.typography.secondarySize}, _
+            True, ppAlignCenter, False, ""
+
+
+        ' PROMO PRICE
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            20, curPromoTop, 105, 22, _
+            promoPrice, "Arial Black", ${c.typography.promoSize}, _
+            True, ppAlignCenter, False, "${c.texts.currency}"
+
+
+        ' SELLING PRICE
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            62, curStaticTop, 65, 12, _
+            sellingPrice, "Arial Black", ${c.typography.sellingSize}, _
+            True, ppAlignRight, True, "${c.texts.currency}"
+
+
+        ' DATE
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            40, curBottomTop, 65, 6, _
+            "${c.texts.date} " & promoEnd, _
+            "Arial", ${c.typography.secondarySize}, _
+            True, ppAlignCenter, False, ""
+
+
+        ' PART NO
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            10, curBottomTop, 35, 6, _
+            partNo, "Arial", ${c.typography.secondarySize}, _
+            True, ppAlignLeft, False, ""
+
+
+        ' T&C
+
+        CreerChampTexte pptSlide, baseLeft, baseTop, _
+            105, curBottomTop, 30, 6, _
+            "${c.texts.tc}", "Arial", ${c.typography.secondarySize}, _
+            True, ppAlignRight, False, ""
+
+
+        labelIdx = labelIdx + 1
+
+    Next i
+
+
+    xlBook.Close False
+    xlApp.Quit
+
+    Set xlSheet = Nothing
+    Set xlBook = Nothing
+    Set xlApp = Nothing
+
+
+    MsgBox "Génération réussie !", vbInformation
+
+    Exit Sub
+
+
+ErreurExcel:
+
+    MsgBox "Erreur Excel : " & Err.Description, vbCritical
+
+    If Not xlBook Is Nothing Then xlBook.Close False
+
+    If Not xlApp Is Nothing Then xlApp.Quit
+
+End Sub
+
+
+' =========================================================
+' MOTEUR TEXTE
+' =========================================================
+
+Sub CreerChampTexte( _
+    slide As Slide, _
+    bLeft As Single, _
+    bTop As Single, _
+    X As Double, _
+    Y As Double, _
+    L As Double, _
+    H As Double, _
+    Texte As String, _
+    Police As String, _
+    Taille As Single, _
+    Gras As Boolean, _
+    Alignement As Long, _
+    Barrer As Boolean, _
+    Devise As String)
+
+    Dim shp As Shape
+
+    Dim fX As Single
+    Dim fY As Single
+
+    fX = bLeft + MMtoPoints(X)
+    fY = bTop + MMtoPoints(Y)
+
+
+    Set shp = slide.Shapes.AddTextbox( _
+        msoTextOrientationHorizontal, _
+        fX, _
+        fY, _
+        MMtoPoints(L), _
+        MMtoPoints(H))
+
+
+    With shp.Shadow
+
+        .Visible = msoTrue
+
+        .ForeColor.RGB = RGB(150,150,150)
+
+        .Transparency = 0.5
+
+        .Blur = 3
+
+        .OffsetX = 2
+
+        .OffsetY = 2
+
+    End With
+
+
+    With shp.TextFrame2
+
+        .WordWrap = msoTrue
+
+        .MarginLeft = 0
+        .MarginRight = 0
+        .MarginTop = 0
+        .MarginBottom = 0
+
+        .TextRange.Text = Texte & Devise
+
+        .TextRange.ParagraphFormat.Alignment = Alignement
+
+        With .TextRange.Font
+
+            .Name = Police
+
+            .Size = Taille
+
+            .Bold = IIf(Gras, msoTrue, msoFalse)
+
+            .Fill.ForeColor.RGB = RGB(0,0,0)
+
+            If Barrer Then
+
+                .Strikethrough = msoStrikeSingle
+
+            Else
+
+                .Strikethrough = msoNoStrike
+
+            End If
+
+        End With
+
+    End With
+
+End Sub
+
+
+Function MMtoPoints(mm As Double) As Single
+
+    MMtoPoints = CSng(mm * 2.83464567)
+
+End Function
+
+
+Function PixelsToPoints(pixels As Double) As Single
+
+    PixelsToPoints = CSng(pixels * 0.75)
+
+End Function
+
+
+Function PixelsToPointsToMM(pointsVal As Single) As Double
+
+    PixelsToPointsToMM = CDbl(pointsVal / 2.83464567)
+
+End Function
+`;
+
+    $("codeEditor").value = vba;
+
+    $("status").textContent =
+        "VBA généré avec succès.";
+
+}
+
+
+/* =========================================================
+   TELECHARGEMENT VBA
+========================================================= */
+
+function downloadVBA() {
+
+    if (!$("codeEditor").value.trim()) {
+
+        generateVBA();
+
+    }
+
+    const blob = new Blob(
+        [$("codeEditor").value],
+        { type: "text/plain;charset=utf-8" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "Generateur_Etiquettes_SPAR.bas";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+    $("status").textContent =
+        "Fichier VBA téléchargé.";
+
+}
+
+
+/* =========================================================
+   OUVERTURE VBA
+========================================================= */
+
+function openVBA() {
+
+    const input =
+        document.createElement("input");
+
+    input.type = "file";
+
+    input.accept = ".bas,.txt,.vba";
+
+    input.onchange = event => {
+
+        const file =
+            event.target.files[0];
+
+        if (!file) return;
+
+        const reader =
+            new FileReader();
+
+        reader.onload = e => {
+
+            $("codeEditor").value =
+                e.target.result;
+
+            $("status").textContent =
+                "Code VBA chargé : " + file.name;
+
+        };
+
+        reader.readAsText(file);
+
+    };
+
+    input.click();
+
+}
+
+
+/* =========================================================
+   CONFIGURATION JSON
+========================================================= */
+
+function saveConfig() {
+
+    const data =
+        JSON.stringify(getConfig(), null, 2);
+
+    const blob =
+        new Blob(
+            [data],
+            {type:"application/json"}
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "spar-label-config.json";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    $("status").textContent =
+        "Configuration sauvegardée.";
+
+}
+
+
+function loadConfig() {
+
+    const input =
+        document.createElement("input");
+
+    input.type = "file";
+
+    input.accept = ".json";
+
+    input.onchange = event => {
+
+        const file =
+            event.target.files[0];
+
+        if (!file) return;
+
+        const reader =
+            new FileReader();
+
+        reader.onload = e => {
+
+            try {
+
+                const c =
+                    JSON.parse(e.target.result);
+
+                applyConfig(c);
+
+                refreshPreview();
+
+                $("status").textContent =
+                    "Configuration chargée.";
+
+            }
+
+            catch(error) {
+
+                alert(
+                    "Configuration invalide."
+                );
+
+            }
+
+        };
+
+        reader.readAsText(file);
+
+    };
+
+    input.click();
+
+}
+
+
+function applyConfig(c) {
+
+    $("labelWidth").value =
+        c.grid.width;
+
+    $("labelHeight").value =
+        c.grid.height;
+
+    $("marginLeft").value =
+        c.grid.marginLeft;
+
+    $("marginTop").value =
+        c.grid.marginTop;
+
+    $("spaceX").value =
+        c.grid.spaceX;
+
+    $("spaceY").value =
+        c.grid.spaceY;
+
+
+    $("globalX").value =
+        c.offsets.globalX;
+
+    $("columnX").value =
+        c.offsets.columnX;
+
+    $("brandDown").value =
+        c.offsets.brandDown;
+
+    $("itemHigh").value =
+        c.offsets.itemHigh;
+
+    $("generalUp").value =
+        c.offsets.generalUp;
+
+    $("bottomUp").value =
+        c.offsets.bottomUp;
+
+    $("promoBottom").value =
+        c.offsets.promoBottom;
+
+    $("uomDown").value =
+        c.offsets.uomDown;
+
+    $("sparTop").value =
+        c.offsets.sparTop;
+
+    $("bottomTop15").value =
+        c.offsets.bottomTop15;
+
+
+    $("brandFont").value =
+        c.typography.brandFont;
+
+    $("brandSize").value =
+        c.typography.brandSize;
+
+    $("itemSize").value =
+        c.typography.itemSize;
+
+    $("promoSize").value =
+        c.typography.promoSize;
+
+    $("sellingSize").value =
+        c.typography.sellingSize;
+
+    $("secondarySize").value =
+        c.typography.secondarySize;
+
+    $("currencySize").value =
+        c.typography.currencySize;
+
+
+    $("excelPath").value =
+        c.excel.path;
+
+    $("sheetName").value =
+        c.excel.sheet;
+
+
+    $("sparText").value =
+        c.texts.spar;
+
+    $("uomText").value =
+        c.texts.uom;
+
+    $("currencyText").value =
+        c.texts.currency;
+
+    $("dateText").value =
+        c.texts.date;
+
+    $("tcText").value =
+        c.texts.tc;
+
+}
+
+
+/* =========================================================
+   HELP
+========================================================= */
+
+function showHelp() {
+
+    $("helpModal")
+        .classList
+        .add("show");
+
+}
+
+function closeHelp() {
+
+    $("helpModal")
+        .classList
+        .remove("show");
+
+}
+
+
+/* =========================================================
+   RACCOURCIS
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.ctrlKey &&
+            event.key.toLowerCase() === "s"
+        ) {
+
+            event.preventDefault();
+
+            downloadVBA();
+
+        }
+
+        if (
+            event.ctrlKey &&
+            event.key.toLowerCase() === "g"
+        ) {
+
+            event.preventDefault();
+
+            generateVBA();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ACTUALISATION AUTOMATIQUE
+========================================================= */
+
+document
+.querySelectorAll("input,select")
+.forEach(element => {
+
+    element.addEventListener(
+        "input",
+        refreshPreview
+    );
+
+    element.addEventListener(
+        "change",
+        refreshPreview
+    );
+
+});
+
+
+/* =========================================================
+   INITIALISATION
+========================================================= */
+
+refreshPreview();
+
+</script>
+
+</body>
+</html>

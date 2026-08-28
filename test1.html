@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Éditeur VBA — Étiquettes SPAR</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: #e5e7eb;
+    height: 100vh;
+    overflow: hidden;
+}
+
+header {
+    height: 64px;
+    background: #0b1220;
+    border-bottom: 1px solid #263244;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 18px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.logo span {
+    color: #facc15;
+}
+
+.header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    border: 0;
+    border-radius: 6px;
+    padding: 9px 13px;
+    background: #374151;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+button:hover {
+    background: #4b5563;
+}
+
+.btn-green {
+    background: #15803d;
+}
+
+.btn-green:hover {
+    background: #16a34a;
+}
+
+.btn-blue {
+    background: #2563eb;
+}
+
+.btn-blue:hover {
+    background: #3b82f6;
+}
+
+.btn-yellow {
+    background: #ca8a04;
+}
+
+.btn-yellow:hover {
+    background: #eab308;
+}
+
+.main {
+    height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: 285px 1fr 510px;
+}
+
+/* =========================================================
+   PANNEAU GAUCHE
+========================================================= */
+
+.sidebar {
+    background: #151d2d;
+    border-right: 1px solid #263244;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.panel-title {
+    font-size: 13px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 10px 0;
+}
+
+.section {
+    background: #1d2738;
+    border: 1px solid #2c384c;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.section h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #f3f4f6;
+}
+
+.field {
+    margin-bottom: 9px;
+}
+
+.field label {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 5px;
+    color: white;
+    padding: 7px;
+    outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #3b82f6;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.element-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.element {
+    padding: 8px;
+    border-radius: 5px;
+    background: #273449;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.element:hover,
+.element.active {
+    background: #2563eb;
+}
+
+/* =========================================================
+   CENTRE : PREVIEW
+========================================================= */
+
+.preview-area {
+    position: relative;
+    background:
+        linear-gradient(#1b2535 1px, transparent 1px),
+        linear-gradient(90deg, #1b2535 1px, transparent 1px);
+    background-size: 25px 25px;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-wrapper {
+    padding: 50px;
+}
+
+.sheet {
+    position: relative;
+    width: 700px;
+    height: 500px;
+    background: #f8f8f8;
+    box-shadow: 0 15px 45px rgba(0,0,0,.5);
+    color: black;
+}
+
+.label {
+    position: absolute;
+    width: 335px;
+    height: 235px;
+    border: 1px dashed #bbb;
+    background: white;
+    overflow: hidden;
+}
+
+.label:nth-child(1) {
+    left: 10px;
+    top: 10px;
+}
+
+.label:nth-child(2) {
+    left: 355px;
+    top: 10px;
+}
+
+.label:nth-child(3) {
+    left: 10px;
+    top: 255px;
+}
+
+.label:nth-child(4) {
+    left: 355px;
+    top: 255px;
+}
+
+.preview-element {
+    position: absolute;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.preview-element.selected {
+    outline: 2px solid #2563eb;
+    background: rgba(37,99,235,.08);
+}
+
+.brand {
+    font-family: Calibri, Arial;
+    font-size: 27px;
+    font-weight: bold;
+    left: 23px;
+    top: 15px;
+}
+
+.item {
+    font-family: Calibri, Arial;
+    font-size: 15px;
+    font-weight: bold;
+    left: 23px;
+    top: 52px;
+    max-width: 285px;
+}
+
+.static {
+    font-family: Arial;
+    font-size: 9px;
+    font-weight: bold;
+    left: 23px;
+    top: 88px;
+}
+
+.uom {
+    font-family: Arial;
+    font-size: 9px;
+    font-weight: bold;
+    left: 135px;
+    top: 148px;
+    width: 90px;
+    text-align: center;
+}
+
+.promo {
+    font-family: Arial Black, Arial;
+    font-size: 43px;
+    font-weight: bold;
+    left: 45px;
+    top: 105px;
+    width: 240px;
+    text-align: center;
+}
+
+.selling {
+    font-family: Arial Black, Arial;
+    font-size: 23px;
+    font-weight: bold;
+    left: 175px;
+    top: 88px;
+    text-decoration: line-through;
+}
+
+.end {
+    font-family: Arial;
+    font-size: 8px;
+    font-weight: bold;
+    left: 105px;
+    top: 184px;
+}
+
+.part {
+    font-family: Arial;
+    font-size: 8px;
+    font-weight: bold;
+    left: 23px;
+    top: 184px;
+}
+
+.tc {
+    font-family: Arial;
+    font-size: 8px;
+    font-weight: bold;
+    right: 23px;
+    top: 184px;
+}
+
+/* =========================================================
+   EDITEUR CODE
+========================================================= */
+
+.editor {
+    background: #0d1420;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.editor-header {
+    height: 44px;
+    background: #151d2d;
+    border-bottom: 1px solid #263244;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+}
+
+.editor-header span {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+#codeEditor {
+    flex: 1;
+    resize: none;
+    border: 0;
+    border-radius: 0;
+    background: #0d1420;
+    color: #d1d5db;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 15px;
+    tab-size: 4;
+}
+
+.statusbar {
+    height: 27px;
+    background: #2563eb;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+}
+
+/* =========================================================
+   MODALE
+========================================================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 600px;
+    max-height: 80vh;
+    overflow: auto;
+    background: #172033;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.modal-box h2 {
+    margin-top: 0;
+}
+
+.help {
+    color: #cbd5e1;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+@media(max-width:1100px) {
+    .main {
+        grid-template-columns: 250px 1fr;
+    }
+
+    .editor {
+        display: none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        ÉDITEUR <span>SPAR</span>
+    </div>
+
+    <div>
+        <small style="color:#9ca3af">
+            Générateur / configurateur VBA
+        </small>
+    </div>
+
+    <div class="header-actions">
+        <button onclick="chargerCode()">📥 Charger VBA</button>
+        <button class="btn-yellow" onclick="resetConfig()">↺ Réinitialiser</button>
+        <button class="btn-blue" onclick="appliquerConfig()">⚙ Appliquer au code</button>
+        <button class="btn-green" onclick="telechargerVBA()">⬇ Télécharger VBA</button>
+        <button onclick="ouvrirAide()">?</button>
+    </div>
+
+</header>
+
+<div class="main">
+
+    <!-- =====================================================
+         PANNEAU GAUCHE
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="panel-title">Configuration générale</div>
+
+        <div class="section">
+
+            <h3>📐 Dimensions</h3>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Largeur (mm)</label>
+                    <input id="labelWidth" type="number" value="145" oninput="updatePreview()">
+                </div>
+
+                <div class="field">
+                    <label>Hauteur (mm)</label>
+                    <input id="labelHeight" type="number" value="100" oninput="updatePreview()">
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Marge gauche</label>
+                    <input id="marginLeft" type="number" value="10">
+                </div>
+
+                <div class="field">
+                    <label>Marge haute</label>
+                    <input id="marginTop" type="number" value="10">
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Espace X</label>
+                    <input id="spaceX" type="number" value="6">
+                </div>
+
+                <div class="field">
+                    <label>Espace Y</label>
+                    <input id="spaceY" type="number" value="6">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <h3>🏷️ Éléments</h3>
+
+            <div class="element-list">
+
+                <div class="element active" onclick="selectElement('brand',this)">
+                    BRAND
+                </div>
+
+                <div class="element" onclick="selectElement('item',this)">
+                    ITEM NAME
+                </div>
+
+                <div class="element" onclick="selectElement('static',this)">
+                    SPAR PRICE
+                </div>
+
+                <div class="element" onclick="selectElement('promo',this)">
+                    PROMO PRICE
+                </div>
+
+                <div class="element" onclick="selectElement('selling',this)">
+                    SELLING PRICE
+                </div>
+
+                <div class="element" onclick="selectElement('uom',this)">
+                    UOM
+                </div>
+
+                <div class="element" onclick="selectElement('part',this)">
+                    PART NO
+                </div>
+
+                <div class="element" onclick="selectElement('end',this)">
+                    PROMO END
+                </div>
+
+                <div class="element" onclick="selectElement('tc',this)">
+                    T&C APPLY
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <h3>🎨 Propriétés</h3>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>X (mm)</label>
+                    <input id="posX" type="number" step=".1"
+                           oninput="updateSelected()">
+                </div>
+
+                <div class="field">
+                    <label>Y (mm)</label>
+                    <input id="posY" type="number" step=".1"
+                           oninput="updateSelected()">
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Largeur</label>
+                    <input id="elementWidth" type="number" step=".1"
+                           oninput="updateSelected()">
+                </div>
+
+                <div class="field">
+                    <label>Hauteur</label>
+                    <input id="elementHeight" type="number" step=".1"
+                           oninput="updateSelected()">
+                </div>
+
+            </div>
+
+            <div class="field">
+                <label>Police</label>
+                <select id="font" onchange="updateSelected()">
+                    <option>Arial</option>
+                    <option>Arial Black</option>
+                    <option>Calibri</option>
+                    <option>Verdana</option>
+                    <option>Tahoma</option>
+                    <option>Times New Roman</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Taille</label>
+                <input id="fontSize" type="number" step=".1"
+                       oninput="updateSelected()">
+            </div>
+
+            <div class="row">
+
+                <div class="field">
+                    <label>Gras</label>
+                    <select id="bold" onchange="updateSelected()">
+                        <option value="true">Oui</option>
+                        <option value="false">Non</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Alignement</label>
+                    <select id="align" onchange="updateSelected()">
+                        <option value="left">Gauche</option>
+                        <option value="center">Centre</option>
+                        <option value="right">Droite</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="field">
+                <label>Texte d'exemple</label>
+                <input id="sampleText"
+                       oninput="updateSelected()">
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <h3>🛠️ Ajustements globaux</h3>
+
+            <div class="field">
+                <label>Décalage X global (px)</label>
+                <input id="globalX" type="number" value="66">
+            </div>
+
+            <div class="field">
+                <label>Décalage colonne droite (px)</label>
+                <input id="columnX" type="number" value="20">
+            </div>
+
+            <div class="field">
+                <label>Décalage général vertical (px)</label>
+                <input id="generalY" type="number" value="20">
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         PREVIEW
+    ====================================================== -->
+
+    <main class="preview-area">
+
+        <div class="preview-wrapper">
+
+            <div class="sheet" id="sheet">
+
+                <!-- LABEL 1 -->
+                <div class="label">
+
+                    <div class="preview-element brand"
+                         data-element="brand"
+                         onclick="selectPreview(this)">
+                        SPAR
+                    </div>
+
+                    <div class="preview-element item"
+                         data-element="item"
+                         onclick="selectPreview(this)">
+                        PRODUIT EXEMPLE
+                    </div>
+
+                    <div class="preview-element static"
+                         data-element="static"
+                         onclick="selectPreview(this)">
+                        SPAR PRICE:
+                    </div>
+
+                    <div class="preview-element promo"
+                         data-element="promo"
+                         onclick="selectPreview(this)">
+                        5 000 FCFA
+                    </div>
+
+                    <div class="preview-element selling"
+                         data-element="selling"
+                         onclick="selectPreview(this)">
+                        6 000
+                    </div>
+
+                    <div class="preview-element uom"
+                         data-element="uom"
+                         onclick="selectPreview(this)">
+                        L'UNITE
+                    </div>
+
+                    <div class="preview-element part"
+                         data-element="part"
+                         onclick="selectPreview(this)">
+                        REF001
+                    </div>
+
+                    <div class="preview-element end"
+                         data-element="end"
+                         onclick="selectPreview(this)">
+                        JUSQU'AU 31/12/2026
+                    </div>
+
+                    <div class="preview-element tc"
+                         data-element="tc"
+                         onclick="selectPreview(this)">
+                        *T&C Apply
+                    </div>
+
+                </div>
+
+                <!-- LABEL 2 -->
+                <div class="label"></div>
+
+                <!-- LABEL 3 -->
+                <div class="label"></div>
+
+                <!-- LABEL 4 -->
+                <div class="label"></div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         EDITEUR VBA
+    ====================================================== -->
+
+    <section class="editor">
+
+        <div class="editor-header">
+
+            <span>📄</span>
+
+            <span id="fileName">
+                Aucun fichier chargé
+            </span>
+
+            <button style="margin-left:auto"
+                    onclick="formaterCode()">
+                Format
+            </button>
+
+        </div>
+
+        <textarea id="codeEditor"
+                  spellcheck="false"
+                  placeholder="Colle ton code VBA ici..."></textarea>
+
+        <div class="statusbar">
+
+            <span id="status">
+                Prêt
+            </span>
+
+            <span style="margin-left:auto">
+                VBA Editor
+            </span>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =========================================================
+     MODALE AIDE
+========================================================= -->
+
+<div class="modal" id="helpModal">
+
+    <div class="modal-box">
+
+        <h2>Éditeur SPAR</h2>
+
+        <div class="help">
+
+            <p>
+                Cet outil permet de modifier visuellement certains
+                paramètres de ton générateur VBA.
+            </p>
+
+            <p>
+                <strong>1.</strong>
+                Colle ton VBA dans la zone de droite ou utilise
+                « Charger VBA ».
+            </p>
+
+            <p>
+                <strong>2.</strong>
+                Sélectionne un élément à gauche :
+                BRAND, ITEM NAME, PROMO PRICE, etc.
+            </p>
+
+            <p>
+                <strong>3.</strong>
+                Modifie X, Y, largeur, hauteur, police ou taille.
+            </p>
+
+            <p>
+                <strong>4.</strong>
+                Clique sur « Appliquer au code ».
+            </p>
+
+            <p>
+                <strong>5.</strong>
+                Clique sur « Télécharger VBA » pour récupérer
+                le fichier généré.
+            </p>
+
+            <hr>
+
+            <p>
+                Les modifications sont appliquées aux constantes
+                et aux paramètres reconnus dans ton code.
+            </p>
+
+        </div>
+
+        <button onclick="fermerAide()">Fermer</button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CODE VBA DE DÉPART
+========================================================= */
+
+const DEFAULT_VBA = `Const CHEMIN_EXCEL As String = "C:\\Users\\SPAR YASSA\\Videos\\WORKDIR\\_MAIN PROMO\\BTS\\BTS.xlsx"
+Const FEUILLE_EXCEL As String = "Feuil1"
+
+Const EXP_ETIQUETTE_LARGEUR As Double = 145#
+Const EXP_ETIQUETTE_HAUTEUR As Double = 100#
+Const EXP_MARGE_GAUCHE As Double = 10#
+Const EXP_MARGE_HAUTE As Double = 10#
+Const EXP_ESPACE_X As Double = 6#
+Const EXP_ESPACE_Y As Double = 6#
+
+Sub GenererEtiquettesSparFideles()
+
+    Dim xlApp As Object
+    Dim xlBook As Object
+    Dim xlSheet As Object
+
+    Dim pptSlide As Slide
+    Dim i As Long
+    Dim rowCount As Long
+    Dim labelIdx As Integer
+
+    ' ...
+
+End Sub`;
+
+
+/* =========================================================
+   CONFIGURATION DES ELEMENTS
+========================================================= */
+
+const elements = {
+
+    brand: {
+        x: 10,
+        y: 8,
+        w: 125,
+        h: 15,
+        font: "Calibri",
+        size: 36,
+        bold: true,
+        align: "left",
+        text: "SPAR"
+    },
+
+    item: {
+        x: 10,
+        y: 23,
+        w: 125,
+        h: 10,
+        font: "Calibri",
+        size: 19.5,
+        bold: true,
+        align: "left",
+        text: "PRODUIT EXEMPLE"
+    },
+
+    static: {
+        x: 10,
+        y: 38,
+        w: 40,
+        h: 6,
+        font: "Arial",
+        size: 10.6,
+        bold: true,
+        align: "left",
+        text: "SPAR PRICE:"
+    },
+
+    promo: {
+        x: 20,
+        y: 46,
+        w: 105,
+        h: 22,
+        font: "Arial Black",
+        size: 58.5,
+        bold: true,
+        align: "center",
+        text: "5 000 FCFA"
+    },
+
+    selling: {
+        x: 62,
+        y: 38,
+        w: 65,
+        h: 12,
+        font: "Arial Black",
+        size: 32,
+        bold: true,
+        align: "right",
+        text: "6 000 FCFA"
+    },
+
+    uom: {
+        x: 50,
+        y: 70,
+        w: 45,
+        h: 6,
+        font: "Arial",
+        size: 10.6,
+        bold: true,
+        align: "center",
+        text: "L'UNITE"
+    },
+
+    part: {
+        x: 10,
+        y: 78,
+        w: 35,
+        h: 6,
+        font: "Arial",
+        size: 10.6,
+        bold: true,
+        align: "left",
+        text: "REF001"
+    },
+
+    end: {
+        x: 40,
+        y: 78,
+        w: 65,
+        h: 6,
+        font: "Arial",
+        size: 10.6,
+        bold: true,
+        align: "center",
+        text: "JUSQU'AU 31/12/2026"
+    },
+
+    tc: {
+        x: 105,
+        y: 78,
+        w: 30,
+        h: 6,
+        font: "Arial",
+        size: 10.6,
+        bold: true,
+        align: "right",
+        text: "*T&C Apply"
+    }
+};
+
+
+/* =========================================================
+   ELEMENT ACTUEL
+========================================================= */
+
+let selectedElement = "brand";
+
+
+/* =========================================================
+   INITIALISATION
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.getElementById("codeEditor").value = DEFAULT_VBA;
+
+    chargerProprietes("brand");
+
+    updatePreview();
+
+});
+
+
+/* =========================================================
+   SELECTION ELEMENT
+========================================================= */
+
+function selectElement(name, domElement) {
+
+    selectedElement = name;
+
+    document.querySelectorAll(".element")
+        .forEach(el => el.classList.remove("active"));
+
+    if (domElement) {
+        domElement.classList.add("active");
+    }
+
+    chargerProprietes(name);
+
+    document.querySelectorAll(".preview-element")
+        .forEach(el => el.classList.remove("selected"));
+
+    const preview = document.querySelector(
+        `.preview-element[data-element="${name}"]`
+    );
+
+    if (preview) {
+        preview.classList.add("selected");
+    }
+}
+
+
+/* =========================================================
+   SELECTION DEPUIS APERCU
+========================================================= */
+
+function selectPreview(element) {
+
+    const name = element.dataset.element;
+
+    const leftElement = [...document.querySelectorAll(".element")]
+        .find(el => el.textContent.trim()
+        .toLowerCase()
+        .replace(" ", "")
+        .includes(name.replace(" ", "")));
+
+    selectElement(name, leftElement);
+
+}
+
+
+/* =========================================================
+   CHARGEMENT PROPRIETES
+========================================================= */
+
+function chargerProprietes(name) {
+
+    const e = elements[name];
+
+    document.getElementById("posX").value = e.x;
+    document.getElementById("posY").value = e.y;
+
+    document.getElementById("elementWidth").value = e.w;
+    document.getElementById("elementHeight").value = e.h;
+
+    document.getElementById("font").value = e.font;
+    document.getElementById("fontSize").value = e.size;
+
+    document.getElementById("bold").value =
+        e.bold ? "true" : "false";
+
+    document.getElementById("align").value = e.align;
+
+    document.getElementById("sampleText").value = e.text;
+
+}
+
+
+/* =========================================================
+   MISE A JOUR ELEMENT
+========================================================= */
+
+function updateSelected() {
+
+    const e = elements[selectedElement];
+
+    e.x = parseFloat(document.getElementById("posX").value) || 0;
+    e.y = parseFloat(document.getElementById("posY").value) || 0;
+
+    e.w = parseFloat(document.getElementById("elementWidth").value) || 1;
+    e.h = parseFloat(document.getElementById("elementHeight").value) || 1;
+
+    e.font = document.getElementById("font").value;
+
+    e.size = parseFloat(
+        document.getElementById("fontSize").value
+    ) || 10;
+
+    e.bold =
+        document.getElementById("bold").value === "true";
+
+    e.align =
+        document.getElementById("align").value;
+
+    e.text =
+        document.getElementById("sampleText").value;
+
+    updatePreview();
+
+}
+
+
+/* =========================================================
+   APERCU
+========================================================= */
+
+function updatePreview() {
+
+    const scale = 2.3;
+
+    document.querySelectorAll(".preview-element")
+        .forEach(el => {
+
+            const name = el.dataset.element;
+            const e = elements[name];
+
+            if (!e) return;
+
+            el.style.left = (e.x * scale) + "px";
+            el.style.top = (e.y * scale) + "px";
+
+            el.style.width = (e.w * scale) + "px";
+            el.style.height = (e.h * scale) + "px";
+
+            el.style.fontFamily = e.font;
+            el.style.fontSize = (e.size * 0.62) + "px";
+
+            el.style.fontWeight =
+                e.bold ? "bold" : "normal";
+
+            el.style.textAlign = e.align;
+
+            el.textContent = e.text;
+
+        });
+
+}
+
+
+/* =========================================================
+   CHARGER VBA
+========================================================= */
+
+function chargerCode() {
+
+    const input = document.createElement("input");
+
+    input.type = "file";
+    input.accept = ".bas,.txt,.vba";
+
+    input.onchange = event => {
+
+        const file = event.target.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = e => {
+
+            document.getElementById("codeEditor").value =
+                e.target.result;
+
+            document.getElementById("fileName").textContent =
+                file.name;
+
+            document.getElementById("status").textContent =
+                "Code chargé : " + file.name;
+
+            analyserVBA();
+
+        };
+
+        reader.readAsText(file);
+
+    };
+
+    input.click();
+
+}
+
+
+/* =========================================================
+   ANALYSE DU VBA
+========================================================= */
+
+function analyserVBA() {
+
+    let code =
+        document.getElementById("codeEditor").value;
+
+    const regex = {
+
+        width:
+            /Const\s+EXP_ETIQUETTE_LARGEUR\s+As\s+Double\s*=\s*([0-9.]+)/i,
+
+        height:
+            /Const\s+EXP_ETIQUETTE_HAUTEUR\s+As\s+Double\s*=\s*([0-9.]+)/i,
+
+        marginLeft:
+            /Const\s+EXP_MARGE_GAUCHE\s+As\s+Double\s*=\s*([0-9.]+)/i,
+
+        marginTop:
+            /Const\s+EXP_MARGE_HAUTE\s+As\s+Double\s*=\s*([0-9.]+)/i,
+
+        spaceX:
+            /Const\s+EXP_ESPACE_X\s+As\s+Double\s*=\s*([0-9.]+)/i,
+
+        spaceY:
+            /Const\s+EXP_ESPACE_Y\s+As\s+Double\s*=\s*([0-9.]+)/i
+    };
+
+
+    for (const key in regex) {
+
+        const match = code.match(regex[key]);
+
+        if (match) {
+
+            const input =
+                document.getElementById(
+                    key === "width"
+                        ? "labelWidth"
+                        : key === "height"
+                        ? "labelHeight"
+                        : key
+                );
+
+            if (input) {
+                input.value = match[1];
+            }
+
+        }
+
+    }
+
+    document.getElementById("status").textContent =
+        "VBA analysé";
+
+}
+
+
+/* =========================================================
+   APPLIQUER CONFIGURATION AU VBA
+========================================================= */
+
+function appliquerConfig() {
+
+    let code =
+        document.getElementById("codeEditor").value;
+
+
+    const values = {
+
+        EXP_ETIQUETTE_LARGEUR:
+            document.getElementById("labelWidth").value,
+
+        EXP_ETIQUETTE_HAUTEUR:
+            document.getElementById("labelHeight").value,
+
+        EXP_MARGE_GAUCHE:
+            document.getElementById("marginLeft").value,
+
+        EXP_MARGE_HAUTE:
+            document.getElementById("marginTop").value,
+
+        EXP_ESPACE_X:
+            document.getElementById("spaceX").value,
+
+        EXP_ESPACE_Y:
+            document.getElementById("spaceY").value
+    };
+
+
+    for (const key in values) {
+
+        const value = values[key];
+
+        const regex =
+            new RegExp(
+                `(Const\\\\s+${key}\\\\s+As\\\\s+Double\\\\s*=\\\\s*)[0-9.]+`,
+                "i"
+            );
+
+        if (regex.test(code)) {
+
+            code = code.replace(
+                regex,
+                `$1${value}#`
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GENERATION DES BLOCS CreerChampTexte
+    ====================================================== */
+
+    code = remplacerChamp(
+        code,
+        "BRAND",
+        elements.brand
+    );
+
+    code = remplacerChamp(
+        code,
+        "ITEM NAME",
+        elements.item
+    );
+
+    code = remplacerChamp(
+        code,
+        "PROMO PRICE",
+        elements.promo
+    );
+
+    code = remplacerChamp(
+        code,
+        "SELLING PRICE",
+        elements.selling
+    );
+
+    code = remplacerChamp(
+        code,
+        "UOM",
+        elements.uom
+    );
+
+    code = remplacerChamp(
+        code,
+        "PART NO",
+        elements.part
+    );
+
+    document.getElementById("codeEditor").value = code;
+
+    document.getElementById("status").textContent =
+        "Configuration appliquée au VBA";
+
+}
+
+
+/* =========================================================
+   REMPLACEMENT DES CHAMPS VBA
+========================================================= */
+
+function remplacerChamp(code, nom, e) {
+
+    let pattern;
+
+    if (nom === "BRAND") {
+
+        pattern =
+            /(CreerChampTexte[\s\S]*?Texte:=brand,[\s\S]*?X:=)[0-9.]+(,[\s\S]*?Y:=)[0-9.]+(,[\s\S]*?L:=)[0-9.]+(,[\s\S]*?H:=)[0-9.]+/i;
+
+    }
+
+    else if (nom === "ITEM NAME") {
+
+        pattern =
+            /(CreerChampTexte[\s\S]*?Texte:=itemName,[\s\S]*?X:=)[0-9.]+(,[\s\S]*?Y:=)[0-9.]+(,[\s\S]*?L:=)[0-9.]+(,[\s\S]*?H:=)[0-9.]+/i;
+
+    }
+
+    else if (nom === "PROMO PRICE") {
+
+        pattern =
+            /(CreerChampTexte[\s\S]*?Texte:=promoPrice,[\s\S]*?X:=)[0-9.]+(,[\s\S]*?Y:=)[0-9.]+(,[\s\S]*?L:=)[0-9.]+(,[\s\S]*?H:=)[0-9.]+/i;
+
+    }
+
+    else if (nom === "SELLING PRICE") {
+
+        pattern =
+            /(CreerChampTexte[\s\S]*?Texte:=sellingPrice,[\s\S]*?X:=)[0-9.]+(,[\s\S]*?Y:=)[0-9.]+(,[\s\S]*?L:=)[0-9.]+(,[\s\S]*?H:=)[0-9.]+/i;
+
+    }
+
+    else if (nom === "UOM") {
+
+        pattern =
+            /(CreerChampTexte[\s\S]*?Texte:="L'UNITE"[\s\S]*?X:=)[0-9.]+(,[\s\S]*?Y:=)[0-9.]+(,[\s\S]*?L:=)[0-9.]+(,[\s\S]*?H:=)[0-9.]+/i;
+
+    }
+
+    else if (nom === "PART NO") {
+
+        pattern =
+            /(CreerChampTexte[\s\S]*?Texte:=partNo,[\s\S]*?X:=)[0-9.]+(,[\s\S]*?Y:=)[0-9.]+(,[\s\S]*?L:=)[0-9.]+(,[\s\S]*?H:=)[0-9.]+/i;
+
+    }
+
+    else {
+
+        return code;
+
+    }
+
+
+    if (!pattern.test(code)) {
+
+        return code;
+
+    }
+
+
+    return code.replace(
+        pattern,
+        `$1${e.x}$2${e.y}$3${e.w}$4${e.h}`
+    );
+
+}
+
+
+/* =========================================================
+   TELECHARGER VBA
+========================================================= */
+
+function telechargerVBA() {
+
+    const code =
+        document.getElementById("codeEditor").value;
+
+    const blob =
+        new Blob([code], {
+            type: "text/plain;charset=utf-8"
+        });
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "Etiquettes_SPAR_Modifie.bas";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    document.getElementById("status").textContent =
+        "Fichier VBA téléchargé";
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetConfig() {
+
+    if (!confirm(
+        "Réinitialiser tous les paramètres ?"
+    )) return;
+
+
+    document.getElementById("labelWidth").value = 145;
+    document.getElementById("labelHeight").value = 100;
+
+    document.getElementById("marginLeft").value = 10;
+    document.getElementById("marginTop").value = 10;
+
+    document.getElementById("spaceX").value = 6;
+    document.getElementById("spaceY").value = 6;
+
+    elements.brand = {
+        x:10,y:8,w:125,h:15,
+        font:"Calibri",size:36,
+        bold:true,align:"left",
+        text:"SPAR"
+    };
+
+    elements.item = {
+        x:10,y:23,w:125,h:10,
+        font:"Calibri",size:19.5,
+        bold:true,align:"left",
+        text:"PRODUIT EXEMPLE"
+    };
+
+    elements.promo = {
+        x:20,y:46,w:105,h:22,
+        font:"Arial Black",size:58.5,
+        bold:true,align:"center",
+        text:"5 000 FCFA"
+    };
+
+    chargerProprietes(selectedElement);
+
+    updatePreview();
+
+}
+
+
+/* =========================================================
+   FORMAT CODE
+========================================================= */
+
+function formaterCode() {
+
+    let code =
+        document.getElementById("codeEditor").value;
+
+    code = code
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .replace(/[ \t]+$/gm, "");
+
+    document.getElementById("codeEditor").value =
+        code;
+
+}
+
+
+/* =========================================================
+   AIDE
+========================================================= */
+
+function ouvrirAide() {
+
+    document
+        .getElementById("helpModal")
+        .classList.add("show");
+
+}
+
+function fermerAide() {
+
+    document
+        .getElementById("helpModal")
+        .classList.remove("show");
+
+}
+
+
+/* =========================================================
+   RACCOURCIS
+========================================================= */
+
+document.addEventListener("keydown", e => {
+
+    if (e.ctrlKey && e.key === "s") {
+
+        e.preventDefault();
+
+        telechargerVBA();
+
+    }
+
+    if (e.ctrlKey && e.key === "z") {
+
+        // Le textarea possède déjà son propre historique.
+        return;
+
+    }
+
+});
+
+
+</script>
+
+</body>
+</html>
